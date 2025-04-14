@@ -10,7 +10,7 @@ def init_poetry(info: dict):
     project_type = info.get("type", "").lower()
     web_library = info.get("web_library", "").lower()
 
-    click.echo("\n🚀 Inicializando ambiente com Poetry...")
+    click.echo("\n🚀 Initializing environment with Poetry...")
 
     # Define a lib extra com base no tipo de projeto
     lib_map = {
@@ -21,7 +21,7 @@ def init_poetry(info: dict):
 
     extra_lib = lib_map.get(project_type)
     if not extra_lib:
-        click.secho("❌ Tipo de projeto desconhecido.", fg="red", bold=True)
+        click.secho("❌ Unknown project type.", fg="red", bold=True)
         return
 
     try:
@@ -39,7 +39,7 @@ def init_poetry(info: dict):
             check=True
         )
 
-        click.secho("✅ Ambiente virtual criado com sucesso!", fg="green")
+        click.secho("✅ Virtual environment created successfully!", fg="green")
 
     except subprocess.CalledProcessError:
-        click.secho("❌ Erro ao configurar o ambiente com o Poetry.", fg="red", bold=True)
+        click.secho("❌ Error configuring environment with Poetry.", fg="red", bold=True)

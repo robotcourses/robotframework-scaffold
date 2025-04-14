@@ -40,9 +40,8 @@ def collect_project_info():
     use_poetry = click.confirm("🐍 Create a virtual environment using Poetry?", default=True)
 
     # 6. Question Python version
-    description = click.prompt("📝 Descreva seu projeto:")
-    python_version = click.prompt("🐍 Versão compatível do Python (ex: ^3.8):", default="^3.12")
-
+    description = click.prompt("📝 Describe your project:")
+    python_version = click.prompt("🐍 Compatible Python version (ex: ^3.8):", default="^3.12")
 
     return {
         "name": name,
