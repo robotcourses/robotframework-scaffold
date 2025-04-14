@@ -40,7 +40,9 @@ def init_poetry(info: dict):
         subprocess.run(
             [
                 "poetry", "install"
-            ]
+            ],
+            cwd=base_path,
+            check=True
         )
 
         click.secho("✅ Virtual environment created successfully!", fg="green")
