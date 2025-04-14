@@ -3,7 +3,8 @@ import shutil
 from .structure import PROJECT_TYPES
 from .constants import GITIGNORE_CONTENT
 from .base_resource import write_base_resource
-from .readme import create_readme  # importa a função de criação do README
+from .readme import create_readme
+from .create_common_resource import create_common_resources
 import click
 from pathlib import Path
 
@@ -29,6 +30,9 @@ def create_project(info):
         project_type,
         info.get("web_library")  # só será usado se o tipo for web
     )
+
+    # Cria os arquivos commons (web e mobile) e connection (api)
+    create_common_resources(Path(base_path), project_type, info.get("web_library"))
 
     # Cria o .gitignore
     with open(os.path.join(base_path, ".gitignore"), "w") as gitignore:
