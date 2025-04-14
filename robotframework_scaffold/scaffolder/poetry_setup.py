@@ -37,6 +37,12 @@ def init_poetry(info: dict):
             check=True
         )
 
+        subprocess.run(
+            [
+                "poetry", "install"
+            ]
+        )
+
         click.secho("✅ Virtual environment created successfully!", fg="green")
 
     except subprocess.CalledProcessError:
