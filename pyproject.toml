@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "robotframework-scaffold"
-version = "0.1.1"
+version = "0.1.2"
 description = "A scaffold tool for structuring Robot Framework projects with best practices."
 authors = ["Robot Courses <git@robotcourses.com.br>"]
 license = "MIT"
@@ -9,7 +9,7 @@ packages = [{ include = "robotframework_scaffold" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-click = "^8.1.8"
+click = "8.1.8"
 
 
 [build-system]
