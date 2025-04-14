@@ -6,10 +6,10 @@ from robotframework_scaffold.scaffolder.poetry_setup import init_poetry
 
 
 @click.group()
-def cli():
+def main():
     pass
 
-@cli.command()
+@main.command()
 @click.option("--dry-run", is_flag=True, help="Preview the project structure without creating files.")
 def init(dry_run):
     """Initialize a new Robot Framework project interactively."""
@@ -25,4 +25,4 @@ def init(dry_run):
         init_poetry(info)
 
 if __name__ == '__main__':
-    cli()
+    main()

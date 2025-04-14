@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "robotframework-scaffold"
-version = "0.1.0"
+version = "0.1.1"
 description = "A scaffold tool for structuring Robot Framework projects with best practices."
 authors = ["Robot Courses <git@robotcourses.com.br>"]
 license = "MIT"
@@ -15,3 +15,6 @@ click = "^8.1.8"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+robot-scaffold = "robotframework_scaffold.cli:main"
