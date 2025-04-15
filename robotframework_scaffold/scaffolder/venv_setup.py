@@ -26,6 +26,9 @@ def init_venv(info: dict):
         # Instala o Robot Framework
         subprocess.run([python_path, "-m", "pip", "install", "robotframework"], check=True)
 
+        # Instala o PyYaml
+        subprocess.run([python_path, "-m", "pip", "install", "pyyaml"], check=True)
+
         # Instala a biblioteca extra com base no tipo de projeto
         project_type = info.get("type")
         web_library = (info.get("web_library") or "").lower()

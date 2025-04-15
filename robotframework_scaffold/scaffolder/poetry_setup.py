@@ -30,6 +30,7 @@ def init_poetry(info: dict):
                 "--description", description,
                 "--python", python_version,
                 "--dependency", "robotframework",
+                "--dependency", "pyyaml",
                 "--dependency", extra_lib,
                 "--no-interaction"
             ],

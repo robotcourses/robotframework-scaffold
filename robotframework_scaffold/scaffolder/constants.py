@@ -69,3 +69,33 @@ MOBILE_STRUCTURE = f"""
 │   └───utils
 └───tests
 """
+
+API_BASE_RESOURCE = f"""
+*** Settings ***
+## Libraries
+Library    RequestsLibrary
+
+## Custom Libraries
+
+## Connections
+Resource    resources/connections/session.resource
+Variables   resources/connections/session_data.yml
+"""
+
+SELENIUM_BASE_RESOURCE = f"""
+*** Settings ***
+## Libraries
+Library    SeleniumLibrary
+"""
+
+BROWSER_BASE_RESOURCE = f"""
+*** Settings ***
+## Libraries
+Library    BrowserLibrary
+"""
+
+MOBILE_BASE_RESOURCE = f"""
+*** Settings ***
+## Libraries
+Library    AppiumLibrary
+"""

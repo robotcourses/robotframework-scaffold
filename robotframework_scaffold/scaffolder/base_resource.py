@@ -1,3 +1,4 @@
+from .constants import API_BASE_RESOURCE, SELENIUM_BASE_RESOURCE, BROWSER_BASE_RESOURCE, MOBILE_BASE_RESOURCE
 from pathlib import Path
 import click
 
@@ -22,9 +23,14 @@ def write_base_resource(project_path: Path, project_type: str, web_library: str 
     base_resource_path = project_path / "base.resource"
     base_resource_path.parent.mkdir(parents=True, exist_ok=True)
 
-    content = f"""*** Settings ***
-Library    {library}
-"""
+    if project_type == 'api':
+        content = API_BASE_RESOURCE
+    elif project_type == 'web' and web_library != 'SeleniumLibrary':
+        content = SELENIUM_BASE_RESOURCE
+    elif project_type == 'web' and web_library != 'BrowserLibrary':
+        content = BROWSER_BASE_RESOURCE
+    elif project_type == 'mobile':
+        content = MOBILE_BASE_RESOURCE
 
     try:
         base_resource_path.write_text(content)

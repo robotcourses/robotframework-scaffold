@@ -4,6 +4,8 @@ from robotframework_scaffold.scaffolder.preview import preview_structure
 from robotframework_scaffold.scaffolder.creator import create_project
 from robotframework_scaffold.scaffolder.poetry_setup import init_poetry
 from robotframework_scaffold.scaffolder.venv_setup import init_venv
+from robotframework_scaffold.scaffolder.templates.api.create_session.session_generator import create_api_session_files
+from robotframework_scaffold.scaffolder.templates.api.create_contracts_routes.contracts_generator import ask_about_swagger, generate_keywords_from_swagger
 
 
 @click.group()
@@ -26,6 +28,12 @@ def init(dry_run):
         init_poetry(info)
     else:
         init_venv(info)
+
+    if info["type"] == "api":
+        app_name = create_api_session_files(info["base_path"])
+        swagger_url, wants_auto_generate = ask_about_swagger()
+        if swagger_url and wants_auto_generate:
+            generate_keywords_from_swagger(swagger_url, info["base_path"], app_name)
 
 if __name__ == '__main__':
     main()

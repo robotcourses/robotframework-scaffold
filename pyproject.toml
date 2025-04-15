@@ -10,6 +10,7 @@ packages = [{ include = "robotframework_scaffold" }]
 [tool.poetry.dependencies]
 python = "^3.8"
 click = "8.1.8"
+pyyaml = "^6.0.2"
 
 
 [build-system]
