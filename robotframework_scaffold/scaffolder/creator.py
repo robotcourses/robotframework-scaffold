@@ -12,10 +12,6 @@ def create_project(info):
     base_path = info["base_path"]
     project_type = info["type"]
 
-    # Se o diretório já existir, remove
-    if os.path.exists(base_path):
-        shutil.rmtree(base_path)
-
     # Cria as pastas principais
     os.makedirs(os.path.join(base_path, "tests"), exist_ok=True)
     os.makedirs(os.path.join(base_path, "resources"), exist_ok=True)

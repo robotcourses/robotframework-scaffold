@@ -3,6 +3,7 @@ from robotframework_scaffold.scaffolder.prompts import collect_project_info
 from robotframework_scaffold.scaffolder.preview import preview_structure
 from robotframework_scaffold.scaffolder.creator import create_project
 from robotframework_scaffold.scaffolder.poetry_setup import init_poetry
+from robotframework_scaffold.scaffolder.venv_setup import init_venv
 
 
 @click.group()
@@ -21,8 +22,10 @@ def init(dry_run):
 
     create_project(info)
 
-    if info.get("use_poetry"):
+    if info["env_manager"] == "poetry":
         init_poetry(info)
+    else:
+        init_venv(info)
 
 if __name__ == '__main__':
     main()

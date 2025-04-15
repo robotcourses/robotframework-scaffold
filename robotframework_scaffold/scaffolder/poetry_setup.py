@@ -39,7 +39,7 @@ def init_poetry(info: dict):
 
         subprocess.run(
             [
-                "poetry", "install"
+                "poetry", "install", "--no-root"
             ],
             cwd=base_path,
             check=True
