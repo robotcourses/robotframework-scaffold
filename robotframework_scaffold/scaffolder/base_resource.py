@@ -48,39 +48,47 @@ def append_resources_to_base(project_path: str, resource_files: list, env: str):
         with open(base_file, "r") as f:
             lines = f.readlines()
 
-        # Inserir routes na seção de Settings
+        # Separa os arquivos por tipo
+        route_resources = [r for r in resource_files if r.startswith("resources/routes")]
+        custom_libraries = [r for r in resource_files if r.startswith("resources/contracts/")]
+
+        # Adiciona os resources na seção Settings
         settings_end_index = 0
         for idx, line in enumerate(lines):
             if line.strip().startswith("*** Variables ***"):
                 settings_end_index = idx
                 break
         else:
-            # Se não encontrar, adiciona no final
             settings_end_index = len(lines)
 
-        route_lines = ["\n## Routes\n"] + [f"Resource    {r}\n" for r in sorted(resource_files)]
+        route_lines = ["\n## Routes\n"] + [f"Resource    {r}\n" for r in sorted(route_resources)]
+        updated_lines = lines[:settings_end_index] + route_lines + lines[settings_end_index:]
 
-        # Inserir ENV na seção de Variables, ou criar uma nova se não existir
+        # Atualiza ou cria a seção de Variáveis com ENV
         env_line = f"${{ENV}}    {env}\n"
-        if any("*** Variables ***" in line for line in lines):
-            for idx, line in enumerate(lines):
+        if any("*** Variables ***" in line for line in updated_lines):
+            for idx, line in enumerate(updated_lines):
                 if line.strip().startswith("*** Variables ***"):
-                    # Encontrou a seção Variables
                     insert_idx = idx + 1
-                    while insert_idx < len(lines) and lines[insert_idx].strip().startswith("${"):
+                    while insert_idx < len(updated_lines) and updated_lines[insert_idx].strip().startswith("${"):
                         insert_idx += 1
-                    lines.insert(insert_idx, env_line)
+                    updated_lines.insert(insert_idx, env_line)
                     break
         else:
-            # Se não tiver seção Variables, adiciona ao final
-            lines += ["\n*** Variables ***\n", env_line]
+            updated_lines += ["\n*** Variables ***\n", env_line]
 
-        # Adiciona os Resources na seção de Settings
-        lines = lines[:settings_end_index] + route_lines + lines[settings_end_index:]
+        # Adiciona Libraries customizadas logo após ## Custom Libraries
+        for idx, line in enumerate(updated_lines):
+            if "## Custom Libraries" in line:
+                insert_at = idx + 1
+                lib_lines = [f"Library    {lib}\n" for lib in sorted(set(custom_libraries))]
+                updated_lines = updated_lines[:insert_at] + lib_lines + updated_lines[insert_at:]
+                break
 
+        # Salva arquivo final
         with open(base_file, "w") as f:
-            f.writelines(lines)
+            f.writelines(updated_lines)
 
-        click.secho("✅ base.resource updated with routes and ENV", fg="green")
+        click.secho("✅ base.resource updated with ENV, routes, and custom libraries.", fg="green")
     except Exception as e:
         click.secho(f"❌ Failed to update base.resource: {e}", fg="red")

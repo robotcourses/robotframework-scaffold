@@ -19,6 +19,7 @@ def ask_about_swagger():
         else:
             click.secho("❌ Could not find a valid Swagger JSON from the provided base URL.", fg="red")
             retry = click.confirm("🔁 Do you want to try another URL?", default=True)
+
             if not retry:
                 return None, False
 
@@ -60,6 +61,7 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
     os.makedirs(routes_dir, exist_ok=True)
 
     generated_files = []
+    custom_libs = set()
 
     for path, methods in paths.items():
         for method, details in methods.items():
@@ -100,8 +102,12 @@ Resource    ../../base.resource
 """
 
             if example_body:
+                controller = path.strip("/").split("/")[0].capitalize()
+                contract_lib_path = generate_python_contract_class(base_path, controller, method, path, example_body)
+                custom_libs.add(contract_lib_path)
+
                 keyword_block += f"""
-    &{{payload}}    Create Dictionary    {format_dict_for_robot(example_body)}
+    &{{payload}}    Contract {method.title()} {controller}    {'    '.join([f'${{{a}}}' for a in example_body.keys()])}
 
     ${{response}}  {method.title()} On Session
     ...  alias=${{{app_name}.alias}}
@@ -128,8 +134,7 @@ Resource    ../../base.resource
             generated_files.append(f"resources/routes/{filename.lower()}")
             click.secho(f"✅ Keyword criada: {file_path}", fg="green")
 
-    return generated_files
-
+    return generated_files + list(custom_libs)
 
 def extract_request_schema(details: dict, swagger_data: dict) -> dict:
     schema = {}
@@ -186,3 +191,76 @@ def get_default_for_type(prop_type: str):
 
 def format_dict_for_robot(data: dict) -> str:
     return "    ".join(f"{k}={json.dumps(v)}" for k, v in data.items())
+
+def generate_python_contract_class(base_path: str, controller: str, method: str, path: str, example_body: dict):
+    from keyword import iskeyword
+
+    class_name = controller.title()
+    method_name = f"{method.lower()}_{path.strip('/').replace('/', '_').replace('{', '').replace('}', '')}"
+    keyword_name = f"Contract {method.title()} {controller.title()}"
+
+    controller_dir = os.path.join(base_path, "resources", "contracts", controller.title())
+    os.makedirs(controller_dir, exist_ok=True)
+
+    init_path = os.path.join(controller_dir, "__init__.py")
+
+    variable_mapping = {}
+
+    def flatten_dict(d, prefix=""):
+        args = []
+        for k, v in d.items():
+            full_key = f"{prefix}.{k}" if prefix else k
+            var_name = full_key.replace(".", "_").lower()
+            if not iskeyword(var_name):
+                variable_mapping[full_key] = var_name
+                if isinstance(v, dict):
+                    args.extend(flatten_dict(v, full_key))
+                elif isinstance(v, list) and v and isinstance(v[0], dict):
+                    args.extend(flatten_dict(v[0], full_key))
+                else:
+                    args.append(var_name)
+        return args
+
+    def build_payload_string(d, prefix="", indent=8):
+        lines = []
+        pad = " " * indent
+        if isinstance(d, dict):
+            lines.append("{")
+            for k, v in d.items():
+                key_str = f'"{k}"'
+                full_key = f"{prefix}.{k}" if prefix else k
+                var_name = variable_mapping.get(full_key, k.lower())
+
+                if isinstance(v, dict):
+                    nested = build_payload_string(v, full_key, indent + 4)
+                    lines.append(f'{pad}{key_str}: {nested},')
+                elif isinstance(v, list) and v and isinstance(v[0], dict):
+                    nested = build_payload_string(v[0], full_key, indent + 8)
+                    lines.append(f'{pad}{key_str}: [\n{pad*2}{nested}\n{pad}],')
+                elif isinstance(v, list):
+                    lines.append(f'{pad}{key_str}: [{var_name}],')
+                else:
+                    lines.append(f'{pad}{key_str}: {var_name},')
+            lines.append(" " * (indent - 4) + "}")
+        return "\n".join(lines)
+
+    args = flatten_dict(example_body)
+    payload = build_payload_string(example_body)
+
+    method_code = f"""
+    @keyword('{keyword_name}')
+    def {method_name}(self, {', '.join(args)}):
+        return {payload}
+"""
+
+    if not os.path.exists(init_path):
+        with open(init_path, "w") as f:
+            f.write("from robot.api.deco import keyword\n\n")
+            f.write(f"class {class_name}:\n")
+            f.write("    def __init__(self):\n        pass\n")
+            f.write(method_code)
+    else:
+        with open(init_path, "a") as f:
+            f.write(method_code)
+
+    return f"resources/contracts/{controller.title()}"
