@@ -7,7 +7,7 @@ from robotframework_scaffold.scaffolder.venv_setup import init_venv
 from robotframework_scaffold.scaffolder.templates.api.create_session.session_generator import create_api_session_files
 from robotframework_scaffold.scaffolder.templates.api.create_contracts_routes.contracts_generator import ask_about_swagger, generate_keywords_from_swagger
 from robotframework_scaffold.scaffolder.base_resource import append_resources_to_base
-from robotframework_scaffold.scaffolder.suite_generator import create_suite_from_routes, create_test_init_file
+from robotframework_scaffold.scaffolder.suite_generator import create_test_init_file
 
 
 @click.group()
@@ -39,7 +39,7 @@ def init(dry_run):
             if generated_files:
                 append_resources_to_base(info["base_path"], generated_files, env)
                 create_test_init_file(info["base_path"], app_name)
-                create_suite_from_routes(info["base_path"], generated_files)
+                # create_suite_from_routes(info["base_path"], generated_files)
 
 if __name__ == '__main__':
     main()
