@@ -77,9 +77,17 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
 
             # path parameters
             path_params = [p["name"] for p in details.get("parameters", []) if p.get("in") == "path"]
+
+            # query parameters
+            query_params = [p["name"] for p in details.get("parameters", []) if p.get("in") == "query"]
+
+            # build URL
             parsed_url = path
             for p in path_params:
                 parsed_url = parsed_url.replace(f"{{{p}}}", f"${{{p}}}")
+            if query_params:
+                qs = "&".join(f"{qp}=${{{qp}}}" for qp in query_params)
+                parsed_url = f"{parsed_url}?{qs}"
 
             # request body schema
             schema = extract_request_schema(details, swagger_data)
@@ -91,11 +99,14 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
                 except Exception as e:
                     click.secho(f"⚠️ Failed to generate payload for {method.upper()} {path}: {e}", fg="yellow")
 
-            # build arguments list for Robot keyword
+            # prepare arguments for Robot keyword
             robot_args = []
             # add path params
             for p in path_params:
                 robot_args.append(f"${{{p}}}")
+            # add query params
+            for qp in query_params:
+                robot_args.append(f"${{{qp}}}")
 
             # if payload exists, generate contract and collect its args
             if example_body:
@@ -109,6 +120,7 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
             # finally add expected status
             robot_args.append(f"${{expected_status}}={success_status}")
 
+            # build keyword block
             keyword_block = f"""*** Settings ***
 Resource    ../../base.resource
 
@@ -119,7 +131,6 @@ Resource    ../../base.resource
 """
 
             if example_body:
-                # build payload invocation
                 payload_args = '    '.join(f'${{{arg}}}' for arg in contract_args)
                 keyword_block += f"""
     &{{payload}}    Contract {method.title()} {controller}    {payload_args}
@@ -142,6 +153,7 @@ Resource    ../../base.resource
     RETURN  ${{response}}
 """
 
+            # write file
             file_path = os.path.join(routes_dir, filename.lower())
             with open(file_path, 'w') as f:
                 f.write(keyword_block)
