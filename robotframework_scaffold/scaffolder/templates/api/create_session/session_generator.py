@@ -17,7 +17,7 @@ Resource    ../../base.resource
 Create {app_display_name} Session
     Create Session
     ...  alias=${{{app_name}.alias}}
-    ...  url=${{{app_name}.url}}
+    ...  url=${{{app_name}.${{ENV}}.url}}
     ...  verify=${{False}}
     ...  disable_warnings=${{True}}
 """
@@ -67,4 +67,4 @@ def create_api_session_files(base_path: str):
 
     click.secho(f"✅ File 'session.resource' successfully created at: {session_resource_path}\n", fg="green")
 
-    return app_name
+    return app_name, env

@@ -23,7 +23,7 @@ def create_project(info):
     write_base_resource(
         Path(base_path),
         project_type,
-        info.get("web_library")  # só será usado se o tipo for web
+        info.get("web_library")
     )
 
     # Cria o .gitignore
