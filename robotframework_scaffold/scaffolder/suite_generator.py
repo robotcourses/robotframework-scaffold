@@ -17,6 +17,6 @@ Test Setup  {app_keyword}
     try:
         with open(init_path, "w") as f:
             f.write(content)
-        click.secho(f"✅ Arquivo '__init__.robot' criado em: {init_path}", fg="green")
+        click.secho(f"✅ File '__init__.robot' created in:: {init_path}", fg="green")
     except Exception as e:
-        click.secho(f"❌ Falha ao criar '__init__.robot': {e}", fg="red")
+        click.secho(f"❌ Failed to create '__init__.robot': {e}", fg="red")

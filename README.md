@@ -1,9 +1,9 @@
-# 🤖 Robot Framework Scaffold
+# 🤖 robotframework-scaffold
 
 Uma ferramenta de linha de comando (CLI) interativa para criar projetos baseados em Robot Framework de forma rápida, padronizada e com boas práticas desde o início.
 
 ## 🔍 Sumário
-- [🤖 Robot Framework Scaffold](#-robot-framework-scaffold)
+- [🤖 robotframework-scaffold](#-robotframework-scaffold)
   - [🔍 Sumário](#-sumário)
   - [🚀 O que é?](#-o-que-é)
   - [✅ Funcionalidades](#-funcionalidades)
@@ -11,7 +11,6 @@ Uma ferramenta de linha de comando (CLI) interativa para criar projetos baseados
   - [📦 Instalção](#-instalção)
   - [✌️ Utilização](#️-utilização)
   - [📁 Estrutura Gerada](#-estrutura-gerada)
-    - [🦾 User Keywords Embaracadas](#-user-keywords-embaracadas)
   - [💡 Dicas](#-dicas)
   - [📄 Licença](#-licença)
 
@@ -28,11 +27,11 @@ Além disso, o usuário pode escolher entre gerenciar o ambiente virtual com **P
 ## ✅ Funcionalidades
 
 - Criação de estrutura de pastas organizada e modular.
+- [APENAS PARA API, POR ENQUANTO] Criação automática de código, com base no Swagger/OpenAPI.
 - Instalação automática das bibliotecas essenciais com base no tipo de projeto.
 - Criação de ambiente virtual com venv ou Poetry.
-- Geração do pyproject.toml com dependências e informações do projeto. (Caso escolha o Poetrt)
 - Compatível com as boas práticas de desenvolvimento e organização de testes com Robot Framework.
-- Suporte a múltiplas bibliotecas de automação web.
+- Suporte a múltiplas bibliotecas de automação web (SeleniumLibrary e BrowserLibrary).
 - Experiência interativa via terminal.
 
 
@@ -53,7 +52,19 @@ pip install robotframework-scaffold
 
 ## ✌️ Utilização
 
-[Em Construção]
+O **robotframework-scaffold** segue um fluxo interativo, via terminal para criação de projetos, uma vez instalado, basta executar o seguinte comando:
+
+```
+robot-scaffold init
+```
+
+Após isso, uma série de perguntas serão realizadas para que o robotframework-scaffold entenda qual a sua necessidade. Atualmente o projeto possui suporte para API, WEB e MOBILE. Sendo que, na versão atual, apenas o fluxo de API realiza a geração automática de código, a partir de um Swagger/OpenAPI.
+
+Para os fluxos Mobile e WEB, a geração automática de código chegará em versões futuras.
+
+Abaixo, um breve vídeo demostrando a utilização do **robotframework-scaffold**:
+
+
 
 ## 📁 Estrutura Gerada
 A estrutura do projeto é criada de forma modular, respeitando o tipo escolhido durante a criação. Veja abaixo exemplos para cada tipo:
@@ -109,11 +120,6 @@ A estrutura do projeto é criada de forma modular, respeitando o tipo escolhido 
 │   pyproject.toml
 │   README.md
 ```
-
-### 🦾 User Keywords Embaracadas
-
-[EM CONSTRUÇÃO]
-
 
 ## 💡 Dicas
 

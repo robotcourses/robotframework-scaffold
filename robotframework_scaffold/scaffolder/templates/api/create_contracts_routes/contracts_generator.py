@@ -15,7 +15,7 @@ def ask_about_swagger():
         data, resolved_url = try_resolve_swagger_json(base_url)
         if data:
             click.secho(f"✅ Swagger JSON found at: {resolved_url}", fg="green")
-            generate_keywords = click.confirm("⚙️ Do you want to auto-generate keyword files from Swagger?", default=True)
+            generate_keywords = click.confirm("⚙️  Do you want to auto-generate keyword files from Swagger?", default=True)
             return resolved_url, generate_keywords
         else:
             click.secho("❌ Could not find a valid Swagger JSON from the provided base URL.", fg="red")
@@ -59,21 +59,25 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
 
     definitions = swagger_data.get("definitions", {})
     components = swagger_data.get("components", {}).get("schemas", {})
-    routes_dir = os.path.join(base_path, "resources", "routes")
-    os.makedirs(routes_dir, exist_ok=True)
+    routes_base = os.path.join(base_path, "resources", "routes")
+    os.makedirs(routes_base, exist_ok=True)
 
     generated_files = []
     custom_libs = set()
 
     for path, methods in paths.items():
         for method, details in methods.items():
+            # determine controller (first path segment)
+            controller = path.strip('/').split('/')[0].capitalize()
+            # prepare directory per controller
+            routes_dir = os.path.join(routes_base, controller)
+            os.makedirs(routes_dir, exist_ok=True)
+
             keyword_name = f"{method.title()}{path}".replace("/", " ").replace("{", "").replace("}", "")
             filename = f"{method}_{path.strip('/').replace('/', '_').replace('{', '').replace('}', '')}.robot"
 
             # status code
-            success_status = next(
-                (code for code in details.get("responses", {}) if str(code).startswith("2")), "200"
-            )
+            success_status = next((code for code in details.get("responses", {}) if str(code).startswith("2")), "200")
 
             # path parameters
             path_params = [p["name"] for p in details.get("parameters", []) if p.get("in") == "path"]
@@ -99,30 +103,24 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
                 except Exception as e:
                     click.secho(f"⚠️ Failed to generate payload for {method.upper()} {path}: {e}", fg="yellow")
 
-            # prepare arguments for Robot keyword
+            # build arguments list
             robot_args = []
-            # add path params
             for p in path_params:
                 robot_args.append(f"${{{p}}}")
-            # add query params
             for qp in query_params:
                 robot_args.append(f"${{{qp}}}")
-
-            # if payload exists, generate contract and collect its args
             if example_body:
-                controller = path.strip('/').split('/')[0].capitalize()
+                # generate contract module and args
                 contract_path, contract_args = generate_python_contract_class(base_path, controller, method, path, example_body)
                 custom_libs.add(contract_path)
-                # add contract args
                 for arg in contract_args:
                     robot_args.append(f"${{{arg}}}")
-
-            # finally add expected status
+            # expected status
             robot_args.append(f"${{expected_status}}={success_status}")
 
-            # build keyword block
+            # assemble keyword
             keyword_block = f"""*** Settings ***
-Resource    ../../base.resource
+Resource    ../../../base.resource
 
 *** Keywords ***
 {keyword_name}
@@ -136,7 +134,7 @@ Resource    ../../base.resource
     &{{payload}}    Contract {method.title()} {controller}    {payload_args}
 
     ${{response}}  {method.title()} On Session
-    ...  alias=${{{app_name}.alias}}  
+    ...  alias=${{{app_name}.alias}}
     ...  url={parsed_url}
     ...  json=${{payload}}
     ...  expected_status=${{expected_status}}
@@ -146,23 +144,22 @@ Resource    ../../base.resource
             else:
                 keyword_block += f"""
     ${{response}}  {method.title()} On Session
-    ...  alias=${{{app_name}.alias}}  
+    ...  alias=${{{app_name}.alias}}
     ...  url={parsed_url}
     ...  expected_status=${{expected_status}}
 
     RETURN  ${{response}}
 """
 
-            # write file
+            # write to controller subfolder
             file_path = os.path.join(routes_dir, filename.lower())
             with open(file_path, 'w') as f:
                 f.write(keyword_block)
+            generated_files.append(f"resources/routes/{controller}/{filename.lower()}")
+            click.secho(f"✅ Keyword created: {file_path}", fg="green")
 
-            generated_files.append(f"resources/routes/{filename.lower()}")
-            click.secho(f"✅ Keyword criada: {file_path}", fg="green")
-
-    # return both route files and custom libs
     return generated_files + sorted(custom_libs)
+
 
 
 # 🔎 Detecta o schema de request para Swagger 2.0 e OpenAPI 3.x

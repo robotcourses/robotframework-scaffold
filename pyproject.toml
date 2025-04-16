@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "robotframework-scaffold"
-version = "0.1.8"
+version = "0.1.9"
 description = "A scaffold tool for structuring Robot Framework projects with best practices."
 authors = ["Robot Courses <git@robotcourses.com.br>"]
 license = "MIT"

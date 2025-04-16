@@ -39,7 +39,10 @@ def init(dry_run):
             if generated_files:
                 append_resources_to_base(info["base_path"], generated_files, env)
                 create_test_init_file(info["base_path"], app_name)
-                # create_suite_from_routes(info["base_path"], generated_files)
+    
+    click.secho("\n")
+    click.secho("🎉  Project successfully created", fg="blue", bold=True)
+    click.secho("⚠️  ATTENTION: Robot Scaffold is intended to speed up your coding work and not replace it completely.\nErrors in generating Keywords may occur.\nSo, please review all generated code before committing to the remote repository.", fg="yellow")
 
 if __name__ == '__main__':
     main()
