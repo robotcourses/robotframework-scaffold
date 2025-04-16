@@ -6,6 +6,7 @@ from robotframework_scaffold.scaffolder.poetry_setup import init_poetry
 from robotframework_scaffold.scaffolder.venv_setup import init_venv
 from robotframework_scaffold.scaffolder.templates.api.create_session.session_generator import create_api_session_files
 from robotframework_scaffold.scaffolder.templates.api.create_contracts_routes.contracts_generator import ask_about_swagger, generate_keywords_from_swagger
+from robotframework_scaffold.scaffolder.base_resource import append_resources_to_base
 
 
 @click.group()
@@ -33,7 +34,9 @@ def init(dry_run):
         app_name = create_api_session_files(info["base_path"])
         swagger_url, wants_auto_generate = ask_about_swagger()
         if swagger_url and wants_auto_generate:
-            generate_keywords_from_swagger(swagger_url, info["base_path"], app_name)
+            generated_files = generate_keywords_from_swagger(swagger_url, info["base_path"], app_name)
+            if generated_files:
+                append_resources_to_base(info["base_path"], generated_files)
 
 if __name__ == '__main__':
     main()

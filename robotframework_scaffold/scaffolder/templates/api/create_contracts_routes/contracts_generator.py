@@ -47,17 +47,19 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
         swagger_data = response.json()
     except Exception as e:
         click.secho(f"❌ Error accessing Swagger: {e}", fg="red")
-        return
+        return []
 
     paths = swagger_data.get("paths", {})
     if not paths:
         click.secho("⚠️ No endpoints found in Swagger.", fg="yellow")
-        return
+        return []
 
     definitions = swagger_data.get("definitions", {})
     components = swagger_data.get("components", {}).get("schemas", {})
     routes_dir = os.path.join(base_path, "resources", "routes")
     os.makedirs(routes_dir, exist_ok=True)
+
+    generated_files = []
 
     for path, methods in paths.items():
         for method, details in methods.items():
@@ -68,7 +70,6 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
                 (code for code in details.get("responses", {}) if str(code).startswith("2")), "200"
             )
 
-            # Extrai parâmetros de path
             path_params = [
                 param["name"] for param in details.get("parameters", [])
                 if param.get("in") == "path"
@@ -78,7 +79,6 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
             for param in path_params:
                 parsed_url = parsed_url.replace(f"{{{param}}}", f"${{{param}}}")
 
-            # Extrai schema do body
             schema = extract_request_schema(details, swagger_data)
             example_body = {}
             if schema:
@@ -87,7 +87,6 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
                 except Exception as e:
                     click.secho(f"⚠️ Failed to generate body for {method.upper()} {path}: {e}", fg="yellow")
 
-            # Monta a keyword
             args = "    ".join([f"${{{p}}}" for p in path_params])
             args += f"    ${{expected_status}}={success_status}"
 
@@ -126,7 +125,11 @@ Resource    ../../base.resource
             with open(file_path, "w") as f:
                 f.write(keyword_block)
 
+            generated_files.append(f"resources/routes/{filename.lower()}")
             click.secho(f"✅ Keyword criada: {file_path}", fg="green")
+
+    return generated_files
+
 
 def extract_request_schema(details: dict, swagger_data: dict) -> dict:
     schema = {}

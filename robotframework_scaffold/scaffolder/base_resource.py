@@ -1,6 +1,7 @@
 from .constants import API_BASE_RESOURCE, SELENIUM_BASE_RESOURCE, BROWSER_BASE_RESOURCE, MOBILE_BASE_RESOURCE
 from pathlib import Path
 import click
+import os
 
 def write_base_resource(project_path: Path, project_type: str, web_library: str = None):
     # Define default libraries
@@ -37,3 +38,16 @@ def write_base_resource(project_path: Path, project_type: str, web_library: str 
         click.secho(f"[✓] base.resource created with {library}", fg="green")
     except Exception as e:
         click.secho(f"[!] Failed to write base.resource: {e}", fg="red", bold=True)
+
+def append_resources_to_base(project_path: str, resource_files: list):
+    base_file = os.path.join(project_path, "base.resource")
+    
+    try:
+        with open(base_file, "a") as f:
+            f.write("\n")
+            f.write("## Routes\n")
+            for resource in sorted(resource_files):
+                f.write(f"Resource    {resource}\n")
+        click.secho("✅ base.resource updated with Swagger routes.", fg="green")
+    except Exception as e:
+        click.secho(f"❌ Failed to update base.resource: {e}", fg="red")
