@@ -10,6 +10,7 @@ Uma ferramenta de linha de comando (CLI) interativa para criar projetos baseados
   - [🛠️ Requisitos](#️-requisitos)
   - [📦 Instalção](#-instalção)
   - [✌️ Utilização](#️-utilização)
+  - [Vídeo](#vídeo)
   - [📁 Estrutura Gerada](#-estrutura-gerada)
   - [💡 Dicas](#-dicas)
   - [📄 Licença](#-licença)
@@ -64,7 +65,13 @@ Para os fluxos Mobile e WEB, a geração automática de código chegará em vers
 
 Abaixo, um breve vídeo demostrando a utilização do **robotframework-scaffold**:
 
+<video src="doc/example_video.mp4" controls autoplay loop muted width="1920">
+  Seu navegador não suporta a tag HTML5 video.
+</video>
 
+## Vídeo
+
+[EM CONSTRUÇÃO ...]
 
 ## 📁 Estrutura Gerada
 A estrutura do projeto é criada de forma modular, respeitando o tipo escolhido durante a criação. Veja abaixo exemplos para cada tipo:
@@ -74,12 +81,12 @@ A estrutura do projeto é criada de forma modular, respeitando o tipo escolhido 
 ```
 .
 ├───resources/
-│   ├───common/
 │   ├───connections/
 │   ├───data/
 │   ├───routes/
 │   └───utils/
 ├───tests/
+│   ├───__init__.robot
 │   .gitignore
 │   base.resource
 │   pyproject.toml

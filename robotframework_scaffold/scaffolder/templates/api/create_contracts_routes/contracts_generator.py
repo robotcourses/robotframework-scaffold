@@ -74,7 +74,7 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
             os.makedirs(routes_dir, exist_ok=True)
 
             keyword_name = f"{method.title()}{path}".replace("/", " ").replace("{", "").replace("}", "")
-            filename = f"{method}_{path.strip('/').replace('/', '_').replace('{', '').replace('}', '')}.robot"
+            filename = f"{method}_{path.strip('/').replace('/', '_').replace('{', '').replace('}', '')}.resource"
 
             # status code
             success_status = next((code for code in details.get("responses", {}) if str(code).startswith("2")), "200")
