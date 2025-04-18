@@ -2,7 +2,8 @@ import click
 import os
 import requests
 import json
-
+import unicodedata
+import re
 
 def ask_about_swagger():
     has_swagger = click.confirm("🔹 Do you have a Swagger (OpenAPI) URL available?", default=False)
@@ -67,8 +68,24 @@ def generate_keywords_from_swagger(swagger_url: str, base_path: str, app_name: s
 
     for path, methods in paths.items():
         for method, details in methods.items():
-            # determine controller (first path segment)
-            controller = path.strip('/').split('/')[0].capitalize()
+            try:
+                raw_tag = details.get("tags", [None])[0]
+                if raw_tag:
+                    controller = normalize_tag(raw_tag)
+                else:
+                    parts = path.strip('/').split('/')
+                    if len(parts) > 1:
+                        controller = parts[1].capitalize()
+                    elif parts:
+                        controller = parts[0].capitalize()
+                    click.secho(
+                        f"⚠️ No tag found for '{path}'. Using fallback controller: '{controller}'",
+                        fg="yellow"
+                    )
+            except Exception as e:
+                click.secho(f"⚠️ Failed to extract controller for '{path}': {e}", fg="yellow")
+                controller = "Unknown"
+
             # prepare directory per controller
             routes_dir = os.path.join(routes_base, controller)
             os.makedirs(routes_dir, exist_ok=True)
@@ -219,11 +236,11 @@ def format_dict_for_robot(data: dict) -> str:
 def generate_python_contract_class(base_path: str, controller: str, method: str, path: str, example_body: dict):
     from keyword import iskeyword
 
-    class_name = controller.title()
-    method_name = f"{method.lower()}_{path.strip('/').replace('/', '_').replace('{', '').replace('}', '')}"
-    keyword_name = f"Contract {method.title()} {controller.title()}"
+    class_name = controller
+    method_name = f"{method.lower()}_{path.strip('/').replace('/', '_').replace('-', '_').replace('{', '').replace('}', '')}"
+    keyword_name = f"Contract {method.title()} {controller}"
 
-    controller_dir = os.path.join(base_path, 'resources', 'contracts', controller.title())
+    controller_dir = os.path.join(base_path, 'resources', 'contracts', controller)
     os.makedirs(controller_dir, exist_ok=True)
     init_path = os.path.join(controller_dir, '__init__.py')
 
@@ -285,4 +302,20 @@ def generate_python_contract_class(base_path: str, controller: str, method: str,
         with open(init_path, 'a') as f:
             f.write(method_code)
 
-    return f"resources/contracts/{controller.title()}", args_list
+    return f"resources/contracts/{controller}", args_list
+
+
+def normalize_tag(tag: str) -> str:
+    # Palavras para ignorar
+    skip_words = {"de", "da", "do", "das", "dos", "e"}
+
+    # Remove acentos
+    nfkd = unicodedata.normalize('NFKD', tag)
+    only_ascii = "".join(c for c in nfkd if not unicodedata.combining(c))
+
+    # Separa em palavras e filtra as que devem permanecer
+    words = re.findall(r'\w+', only_ascii)
+    filtered = [word for word in words if word.lower() not in skip_words]
+
+    # Junta mantendo capitalização original (como vem do Swagger)
+    return ''.join(filtered)
